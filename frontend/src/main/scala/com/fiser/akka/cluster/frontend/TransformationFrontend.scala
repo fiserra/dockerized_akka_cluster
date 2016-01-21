@@ -33,10 +33,15 @@ class TransformationFrontend extends Actor {
 
 object TransformationFrontend {
   def main(args: Array[String]): Unit = {
-    // Override the configuration of the port when specified as program argument
+    args.toList.foreach(println)
+
+    val port = if (args.isEmpty) "0" else args(0)
     val address = java.net.InetAddress.getLocalHost.getHostAddress
+
     println(s"---> address = $address")
-    val config = ConfigFactory.load()
+    val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port").
+      withFallback(ConfigFactory.parseString(s"akka.remote.netty.tcp.hostname=$address")).
+      withFallback(ConfigFactory.load())
 
     val system = ActorSystem("ClusterSystem", config)
     val frontend = system.actorOf(Props[TransformationFrontend], name = "frontend")
