@@ -1,4 +1,5 @@
 import com.typesafe.sbt.packager.docker._
+import sbt.dsl._
 
 name := "dockerized_akka_cluster"
 
@@ -22,11 +23,11 @@ val commonDependencies = Seq(
   "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion
 )
 
-enablePlugins(DockerPlugin)
-enablePlugins(JavaAppPackaging)
 
 lazy val root = (project in file(".")).
   aggregate(core, frontend, backend)
+
+
 
 lazy val core = project.in(file("core")).
   settings(commonSettings: _*)
@@ -34,12 +35,12 @@ lazy val core = project.in(file("core")).
 lazy val frontend = project.settings(commonSettings: _*).dependsOn(core)
   .settings(
     libraryDependencies ++= commonDependencies
-  )
+  ).enablePlugins(DockerPlugin).enablePlugins(JavaAppPackaging)
 
 lazy val backend = project.in( file("backend") ).
   settings(commonSettings: _*).dependsOn(core)
   .settings(
     libraryDependencies ++= commonDependencies
-  )
+  ).enablePlugins(DockerPlugin).enablePlugins(JavaAppPackaging)
 
     

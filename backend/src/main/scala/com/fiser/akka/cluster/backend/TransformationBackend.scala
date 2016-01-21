@@ -29,13 +29,15 @@ class TransformationBackend extends Actor {
 
 object TransformationBackend {
   def main(args: Array[String]): Unit = {
+    val address = java.net.InetAddress.getLocalHost.getHostAddress
+    println(s"---> address = $address")
     // Override the configuration of the port when specified as program argument
-    val port = if (args.isEmpty) "0" else args(0)
-    val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$port").
-      withFallback(ConfigFactory.parseString("akka.cluster.roles = [backend]")).
-      withFallback(ConfigFactory.load())
+    val config = ConfigFactory.load()
 
     val system = ActorSystem("ClusterSystem", config)
     system.actorOf(Props[TransformationBackend], name = "backend")
+
+    system.actorOf(Props[SimpleClusterListener], name = "clusterListener")
+
   }
 }
